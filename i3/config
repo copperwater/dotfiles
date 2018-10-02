@@ -169,7 +169,6 @@ bar {
 exec --no-startup-id i3-msg 'workspace 9; exec thunderbird; workspace 1'
 
 # bind function keys to lighting
-# ON HOLD
 bindcode 232 exec --no-startup-id ~/.local/bin/backlight.sh dec
 bindcode 233 exec --no-startup-id ~/.local/bin/backlight.sh inc
 
@@ -182,6 +181,9 @@ bindcode 233 exec --no-startup-id ~/.local/bin/backlight.sh inc
 # bind alt-tab to switching workspace
 bindsym $mod+Tab workspace next
 
+# allow windows to be made floating
+bindsym $mod+T floating toggle
+
 # Lock screen key combination.
 bindsym Control+$mod+l exec --no-startup id xset s activate
 
@@ -193,3 +195,4 @@ focus_follows_mouse no
 
 # lock screen on lid close
 exec --no-startup-id xss-lock -- i3lock -n -f -i ~/.config/i3/iw6OKwd.png
+
