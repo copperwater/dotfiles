@@ -171,6 +171,10 @@ alias xclipc="xclip -selection clipboard"
 export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
 export LESS=' -R '
 
+# set environment variable so that ls doesn't show garish blue-on-green-back
+# for directories that are globally writable (common when mounting ext4 fs)
+export LS_COLORS=$LS_COLORS:'ow=:tw='
+
 # banner setup
 # readlink expands ~ into the proper path
 export QUOTEFILE=$(readlink -f ~/quotes.dat)
