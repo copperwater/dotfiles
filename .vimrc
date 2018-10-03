@@ -8,7 +8,7 @@ set pastetoggle=<F2>
 
 " make it see tab characters as 8 spaces
 set tabstop=8
-" make the default indent level 3 spaces
+" make the default indent level 2 spaces
 set shiftwidth=2
 " make softtabstop always take the value of shiftwidth by setting it negative
 set softtabstop=-1
@@ -112,13 +112,18 @@ filetype plugin on
 filetype indent on
 
 """ FILETYPE SPECIFIC SETTINGS
-" Set .hbs files to html mode
+" Handlebars HTML template files: Set .hbs files to html mode
 autocmd BufReadPost *.hbs set filetype=html
-" Set chuck files to ck mode
+" ChucK music programming language: Set .ck files to chuck mode
 autocmd BufReadPost *.ck set filetype=ck
-" Set .csv files to CSV mode
+" Comma separated or tab separated values: Set .csv files to CSV mode
 " does having both BufNewFile, BufReadPost work?
 autocmd BufNewFile,BufReadPost *.csv set filetype=csv
+" To avoid having to make a copy of csv.vim as tsv.vim and just add a few commands to it,
+" stick them here instead.
+autocmd BufNewFile,BufReadPost *.tsv set filetype=csv | set shiftwidth=0 | set noexpandtab
+" For some reason this requires its own line.
+autocmd BufNewFile,BufReadPost *.tsv Delimiter \t
 " Different indent levels
 " Uncomment if there is a problem with any of these file types
 " autocmd FileType javascript set shiftwidth=2
