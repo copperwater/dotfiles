@@ -130,6 +130,12 @@ alias pgstop='pg_ctl stop -D /var/lib/postgresql/9.4/main'
 # ALIASES
 #
 
+# vi-style command editing
+set -o vi
+
+# stop ctrl-s from suspending the terminal
+stty -ixon -ixoff
+
 # safety nets
 alias rm='rm -Iv --preserve-root'
 alias mv='mv -iv'
@@ -165,6 +171,9 @@ alias lo='libreoffice'
 
 # xclip straight to keyboard
 alias xclipc="xclip -selection clipboard"
+
+# almost never want to open feh without autoscaling
+alias feh="feh -."
 
 # set environment variables so source-highlight works with less
 # requires source-highlight to be installed
