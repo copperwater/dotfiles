@@ -114,6 +114,8 @@ filetype indent on
 """ FILETYPE SPECIFIC SETTINGS
 " Handlebars HTML template files: Set .hbs files to html mode
 autocmd BufReadPost *.hbs set filetype=html
+" Template Toolkit output: is HTML plus extensions, also set to html
+autocmd BufNewFile,BufReadPost *.tt set filetype=html
 " ChucK music programming language: Set .ck files to chuck mode
 autocmd BufReadPost *.ck set filetype=ck
 " Comma separated or tab separated values: Set .csv files to CSV mode
