@@ -166,7 +166,7 @@ bar {
 #exec --no-startup-id nm-applet
 
 # start thunderbird in workspace 9
-exec --no-startup-id i3-msg 'workspace 9; exec thunderbird; workspace 1'
+# exec --no-startup-id i3-msg 'workspace 9; exec thunderbird; workspace 1'
 
 # bind function keys to lighting
 bindcode 232 exec --no-startup-id ~/.local/bin/backlight.sh dec
