@@ -172,8 +172,14 @@ alias lo='libreoffice'
 # xclip straight to keyboard
 alias xclipc="xclip -selection clipboard"
 
-# almost never want to open feh without autoscaling
-alias feh="feh -."
+# almost never want to open feh without autoscaling and aliasing
+alias feh="feh -. --force-aliasing"
+
+# make with many jobs
+alias make='make -j$((`nproc`+1))'
+
+# grep with no binaries
+alias grep='grep --color=auto --binary-files=without-match --exclude-dir=.git'
 
 # set environment variables so source-highlight works with less
 # requires source-highlight to be installed
