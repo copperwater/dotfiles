@@ -30,6 +30,9 @@ vnoremap < <gv
 " autocomplete parens when typed
 " inoremap ( ()<Esc>i
 
+" prevent going into Ex mode by accident
+nnoremap Q <Nop>
+
 " bind Ctrl-H, Ctrl-J, Ctrl-K, Ctrl-L to move between windows rather than Ctrl-W + [hjkl]
 map <C-h> <C-w>h
 map <C-j> <C-w>j
@@ -53,6 +56,10 @@ map <Leader>s <esc>:update<CR>
 noremap <Leader>q :quit<CR>
 " and bind :quitall to ,Q
 noremap <Leader>Q :quitall<CR>
+
+" bind ,f and ,b to cnext and cprev for going through errors
+nnoremap <Leader>f :cnext<CR>
+nnoremap <Leader>b :cprev<CR>
 
 " bind w to "write"
 nnoremap w :w<CR>
@@ -202,5 +209,19 @@ set fo+=r
 " Do insert comment leader when hitting o or O on a comment line in normal mode
 set fo+=o
 
+" use custom color scheme for vimdiff
+if &diff
+  colorscheme vimdiff
+endif
+
+""" X WINDOWS VIM ONLY
+
+" Copy and paste into/out of the X clipboard
+set clipboard=unnamedplus
+
+" GVim - no blank white area at bottom
+set guiheadroom=0
+
 " Helpful notes
 " Format XML and CSV: :%!xmllint --format -  :%!column -s, -t
+" look into setting colorcolumn on different filetypes
