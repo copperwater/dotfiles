@@ -1,0 +1,23 @@
+#!/bin/sh
+# NetHack launcher script.
+
+if [ -z $1 ]; then
+  echo "Usage: $0 path/to/game/binary [-g|-x]"
+  exit 1
+fi
+GAMEBIN=$1
+
+if [ ! -z $1 ] && [ "$2" = "-g" ]; then
+  # launch game in gdb
+  gdb $GAMEBIN
+elif [ ! -z $1 ] && [ "$2" = "-x" ]; then
+  # launch game in explore mode
+  $GAMEBIN -X
+else
+  # launch game in wizard mode
+  $GAMEBIN -D -u wizard
+fi
+
+# Template script that invokes this script with a specific game binary
+##!/bin/sh
+#nethack-launch ~/nh/install/games/lib/nethackdir/nethack $1
