@@ -30,15 +30,9 @@ shopt -s checkwinsize
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-# set a fancy prompt (non-color, unless we know we "want" color)
-case "$TERM" in
-    xterm-color|*-256color) color_prompt=yes;;
-esac
-
-# uncomment for a colored prompt, if the terminal has the capability; turned
-# off by default to not distract the user: the focus in a terminal window
-# should be on the output of commands, not on the prompt
-#force_color_prompt=yes
+# uncomment for a colored prompt, if the terminal has the capability
+# (pretty much any modern terminal will)
+force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
@@ -51,45 +45,58 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-if [ "$color_prompt" = yes ]; then
-    PS1='\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-    PS1='\u:\w\$ '
-fi
+# Generation function that constructs the PS1 prompt format string
+# without incorporating ugly conditionals into a single string.
+ps1_generator() {
+    local saved_ret=$?
+    local Nclr='\[\e[0m\]'
+    local Bgrn='\[\e[1;32m\]'
+    local Bblu='\[\e[1;34m\]'
+    local Bred='\[\e[1;31m\]'
+    local cyan='\[\e[0;36m\]'
+    if [ ! -n $color_prompt ]; then
+        Nclr=''
+        Bgrn=''
+        Bblu=''
+        Bred=''
+        cyan=''
+    fi
+
+    # base part of prompt, current working directory
+    local wd=$(pwd)
+
+    # May need to replace \u with \h if you are working across multiple hosts a
+    # lot
+    local precolon='\u'
+    local postcolon='\w'
+    PS1="${Bgrn}$precolon${Nclr}:${Bblu}$postcolon${Nclr}"
+
+    # add current git branch, if any, after this
+    local branch=$(git branch --show-current 2>/dev/null)
+    if [[ $branch != "" ]]; then
+        PS1+=" ${cyan}[$branch]${Nclr}"
+    fi
+
+    # add an appropriate emoticon based on the exit code of the last command
+    # Experimental.
+    if [ $saved_ret != 0 ]; then
+        PS1+=" ${Bred}:/${Nclr}"
+    else
+        PS1+=" ${Bgrn}:)${Nclr}"
+    fi
+
+    # finish with the traditional $
+    PS1+=" $ "
+}
+export PROMPT_COMMAND=ps1_generator
 unset color_prompt force_color_prompt
 
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
-
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
-
-# colored GCC warnings and errors
-#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
-# some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+# Utility function to tell us whether a command exists on this system
+# (not for use by shell user, really, though it doesn't get undefined so they
+# *can* use it - provided for this file and .bash_aliases)
+cmdexists() {
+  command -v $1 >/dev/null
+}
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
@@ -97,7 +104,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
+    source ~/.bash_aliases
 fi
 
 # enable programmable completion features (you don't need to enable
@@ -105,93 +112,41 @@ fi
 # sources /etc/bash.bashrc).
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
+    source /usr/share/bash-completion/bash_completion
   elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
+    source /etc/bash_completion
   fi
 fi
 
-################################################################################
-# CUSTOM ONES START HERE
-################################################################################
-
 # Set default editor as Vim
-export EDITOR=/usr/bin/vim
+export EDITOR=$(command -v vim)
 
-# Add .local/bin to the PATH
+# Add executables in .local/bin to the PATH
 export PATH=$PATH:~/.local/bin
 
-# Add Postgres commands to the PATH
-export PATH=$PATH:/usr/lib/postgresql/9.4/bin
-alias pgstart='pg_ctl start -D /var/lib/postgresql/9.4/main'
-alias pgstop='pg_ctl stop -D /var/lib/postgresql/9.4/main'
-
-#
-# ALIASES
-#
-
-# vi-style command editing
+# Use vi-style command line editing
 set -o vi
 
 # stop ctrl-s from suspending the terminal
 stty -ixon -ixoff
 
-# safety nets
-alias rm='rm -Iv --preserve-root'
-alias mv='mv -iv'
-alias cp='cp -iv'
-alias ln='ln -iv'
-
-# ls shortcuts
-alias ll='ls -la'
-alias l.='ls -d .*'
-
-# cd shortcuts
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ..2='cd ../..'
-alias ..3='cd ../../..'
-alias ..4='cd ../../../..'
-alias ..5='cd ../../../../..'
-
-# mkdir/rmdir can create/destroy directory trees and will show output
-alias mkdir='mkdir -pv'
-alias rmdir='rmdir -pv'
-
-# command to show all ports
-alias ports='netstat -tulanp'
-
-# sha1
-alias sha1='openssl sha1'
-
-# long command shortenings
-alias lo='libreoffice'
-
-# xclip straight to keyboard
-alias xclipc="xclip -selection clipboard"
-
-# almost never want to open feh without autoscaling and aliasing
-alias feh="feh -. --force-aliasing"
-
-# make with many jobs
-alias make='make -j$((`nproc`+1))'
-
-# grep with no binaries
-alias grep='grep --color=auto --binary-files=without-match --exclude-dir=.git'
-
 # set environment variables so source-highlight works with less
 # requires source-highlight to be installed
-export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
-export LESS=' -R '
+if cmdexists src-hilite-lesspipe.sh; then
+  export LESSOPEN="| src-hilite-lesspipe.sh %s"
+  export LESS=' -R '
+fi
 
 # set environment variable so that ls doesn't show garish blue-on-green-back
 # for directories that are globally writable (common when mounting ext4 fs)
-export LS_COLORS=$LS_COLORS:'ow=:tw='
+# enable color support of ls
+if [ -x /usr/bin/dircolors ]; then
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  export LS_COLORS=$LS_COLORS:'ow=:tw='
+fi
 
 # banner setup
 # readlink expands ~ into the proper path
-export QUOTEFILE=$(readlink -f ~/quotes.dat)
-export BANNERPATH=$(readlink -f ~/projects/banner/banner)
+#export QUOTEFILE=$(readlink -f ~/quotes.dat)
+#export BANNERPATH=$(readlink -f ~/projects/banner/banner)
 #~/projects/banner/bannerquote.sh
