@@ -21,6 +21,10 @@ endfunction
 
 call DebugMsg("Loading " . expand("<sfile>"))
 
+" Set VIMHOME to the directory of this file.
+" Note: this presumes that this file is ~/.vim/vimrc, NOT ~/.vimrc! If it's
+" ~/.vimrc then VIMHOME will just be ~
+let $VIMHOME=expand('<sfile>:p:h')
 
 "" GENERAL SETTINGS
 
@@ -201,21 +205,8 @@ set rtp+=$HOME/.vim/bundle/Vundle.vim
 " start vundle
 call vundle#begin()
 
-" required plugin is Vundle itself, must be first
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'scrooloose/nerdtree'
-Plugin 'tomtom/tcomment_vim'
-Plugin 'christoomey/vim-tmux-navigator'
-
-" Plugins to look into
-" gmarik/Vundle.vim
-" scrooloose/nerdtree
-" scrooloose/nerdcommenter
-" Valloric/YouCompleteMe
-" tomtom/tcomment_vim
-" jistr/vim-nerdtree-tabs
-" nathanaelkane/vim-indent-guides
-" xolox/vim-session and xolox/vim-misc (dependency)
+" Keep plugins in a separate file
+source $VIMHOME/vundle-list.vim
 
 " stop vundle
 call vundle#end()
