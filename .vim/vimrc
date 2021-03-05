@@ -71,14 +71,15 @@ map <C-l> <C-w>l
 " set up comma as the map leader
 let mapleader = ","
 
-" bind tab commands to ,q ,e ,t
-" map <Leader>q <esc>:tabprevious<CR>
-map <Leader>e <esc>:tabprevious<CR>
-map <Leader>r <esc>:tabnext<CR>
+" bind tab commands to ,g ,h ,t
+map <Leader>g <esc>:tabprevious<CR>
+map <Leader>h <esc>:tabnext<CR>
 map <Leader>t <esc>:tabnew<CR>
 
 " bind save to ,s
 map <Leader>s <esc>:update<CR>
+" also bind Ctrl-s to save, for muscle memory
+map <C-s> <esc>:update<CR>
 
 " bind :quit to ,q
 noremap <Leader>q :quit<CR>
@@ -89,8 +90,23 @@ noremap <Leader>Q :quitall<CR>
 nnoremap <Leader>f :cnext<CR>
 nnoremap <Leader>b :cprev<CR>
 
+" use F10 to present a buffer menu and prompt the user for which one to go to
+nnoremap <F10> :buffers<CR>:buffer<Space>
+
+" bind ,w and ,W to copy the current word/WORD to the w register:
+nnoremap <leader>w :let @w=expand("<cword>")<CR>
+nnoremap <leader>W :let @w=expand("<cWORD>")<CR>
+
+" bind ,r to replace the current word with contents of the w register
+nnoremap <leader>r viw"wp
+
 " highlight syntax
 syntax on
+
+" Assume we have 256 colors.
+" This'll only work right if the terminal supports 256 colors. But we're not
+" in the 80s.
+set t_Co=256
 
 " disable normal backups (created by writing to an existing file)
 set nobackup
@@ -104,6 +120,10 @@ set autoindent
 
 " don't set in-editor newlines (lines can go off the right of the screen)
 set nowrap
+" but if we are in some filetype or mode where we do wrap, do it nicely
+set linebreak
+" indent wrapped lines to the same amount
+set breakindent
 
 " Highlight search results
 set hlsearch
@@ -127,6 +147,13 @@ set smartcase
 
 " don't redraw when executing a macro
 set lazyredraw
+
+" 'set list' enables the display of whitespace, and 'set listchars' refines
+" the behavior of that. 'list' is off by default...
+set nolist
+" but we define characters to replace whitespace with if it's turned on
+" anyway.
+set listchars=tab:>.,trail:.,extends:#,nbsp:.
 
 " formatoptions help: ":help fo-table" or ":help fo"
 " Don't autowrap text
@@ -187,9 +214,6 @@ autocmd FileType css set shiftwidth=4
 
 " Always show statusline
 "set laststatus=2
-
-" Use 256 colours (Use this setting only if your terminal supports 256 colours)
-"set t_Co=256
 
 
 """ VUNDLE
