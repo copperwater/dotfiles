@@ -1,3 +1,27 @@
+"" FRONT MATTER
+" vim: textwidth=78 filetype=vim
+
+" This should be at the top of the file. We don't do vi compatibility, and it
+" messes with some vundle plugins.
+set nocompatible
+
+" Setting debug_enable=1 allows adding diagnostic messages in the vimrc stuff,
+" e.g.:
+"   call  DebugMsg("something...")
+" It's handy for solving problems in vim configuration sometimes.
+let g:debug_enable=0
+
+function! DebugMsg(msg)
+    if exists("g:debug_enable")
+        if g:debug_enable
+            echom( "DebugMsg: [" . a:msg . "]")
+        endif
+    endif
+endfunction
+
+call DebugMsg("Loading " . expand("<sfile>"))
+
+
 "" GENERAL SETTINGS
 
 " backspace over autoindent, line breaks, start of insert
@@ -61,9 +85,6 @@ noremap <Leader>Q :quitall<CR>
 nnoremap <Leader>f :cnext<CR>
 nnoremap <Leader>b :cprev<CR>
 
-" bind w to "write"
-nnoremap w :w<CR>
-
 " highlight syntax
 syntax on
 
@@ -103,6 +124,16 @@ set smartcase
 " don't redraw when executing a macro
 set lazyredraw
 
+" formatoptions help: ":help fo-table" or ":help fo"
+" Don't autowrap text
+set fo-=t
+" Don't autowrap comments
+set fo-=c
+" Do insert comment leader when hitting Enter in insert mode
+set fo+=r
+" Do insert comment leader when hitting o or O on a comment line in normal mode
+set fo+=o
+
 " Function for deleting trailing white space
 func! DeleteTrailingWS()
   exe "normal mz"
@@ -114,6 +145,7 @@ autocmd BufWrite * :call DeleteTrailingWS()
 
 " enable filetype detection
 filetype on
+" load plugins for file types
 filetype plugin on
 " indent based on file type
 filetype indent on
@@ -161,7 +193,6 @@ autocmd FileType css set shiftwidth=4
 " Run :PluginInstall or see documentation at github.com/VundleVim/Vundle.vim
 
 " required settings for vundle
-set nocompatible
 filetype off
 
 " set runtime path to include vundle
@@ -184,6 +215,7 @@ Plugin 'christoomey/vim-tmux-navigator'
 " tomtom/tcomment_vim
 " jistr/vim-nerdtree-tabs
 " nathanaelkane/vim-indent-guides
+" xolox/vim-session and xolox/vim-misc (dependency)
 
 " stop vundle
 call vundle#end()
@@ -197,17 +229,6 @@ vnoremap . :TComment<CR>
 filetype on
 " use filetype plugins and filetype specific indentation
 filetype plugin indent on
-
-" formatoptions is set to defaults by setting nocompatible, so changes to that have to go here
-" formatoptions help: ":help fo-table" or ":help fo"
-" Don't autowrap text
-set fo-=t
-" Don't autowrap comments
-set fo-=c
-" Do insert comment leader when hitting Enter in insert mode
-set fo+=r
-" Do insert comment leader when hitting o or O on a comment line in normal mode
-set fo+=o
 
 " use custom color scheme for vimdiff
 if &diff
