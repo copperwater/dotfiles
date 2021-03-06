@@ -51,8 +51,9 @@ set copyindent
 " By default, wrap lines at 80 characters; file types may override this
 set textwidth=80
 
-" Write the current file when jumping to another
-set autowrite
+" Don't write the current file when jumping to another (it writes when ZQ is
+" typed)
+set noautowrite
 " disable normal backups (created by writing to an existing file)
 set nobackup
 " enable swap file
@@ -94,10 +95,14 @@ set formatoptions+=o
 set formatoptions+=q
 
 " Function for deleting trailing white space
+" Control this by a variable, so that certain filetypes can override it
+" and ignore this behavior.
 func! DeleteTrailingWS()
-  exe "normal mz"
-  %s/\s\+$//ge
-  exe "normal `z"
+    if !exists("b:no_delete_trailing_ws") || !b:no_delete_trailing_ws
+        exe "normal mz"
+        %s/\s\+$//ge
+        exe "normal `z"
+    endif
 endfunc
 " Delete trailing white space when saving a buffer
 autocmd BufWrite * :call DeleteTrailingWS()
