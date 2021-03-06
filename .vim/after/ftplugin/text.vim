@@ -1,7 +1,6 @@
 " Text file specific settings for Vim
 
 " Autowrap text
-set wrap
-set fo+=t
-set textwidth=80
-
+setlocal wrap
+setlocal formatoptions+=t
+setlocal textwidth=80
