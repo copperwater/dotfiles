@@ -7,7 +7,7 @@ set nocompatible
 
 " Setting debug_enable=1 allows adding diagnostic messages in the vimrc stuff,
 " e.g.:
-"   call  DebugMsg("something...")
+"   call  DebugMsg("option wrap is " . &wrap)
 " It's handy for solving problems in vim configuration sometimes.
 let g:debug_enable=0
 
@@ -29,15 +29,12 @@ let $VIMHOME=expand('<sfile>:p:h')
 "" GENERAL SETTINGS
 
 " backspace over autoindent, line breaks, start of insert
-set bs=2
-
-" paste mode
-set pastetoggle=<F2>
+set backspace=indent,eol,start
 
 " make it see tab characters as 8 spaces
 set tabstop=8
-" make the default indent level 2 spaces
-set shiftwidth=2
+" make the default indent level 4 spaces
+set shiftwidth=4
 " make softtabstop always take the value of shiftwidth by setting it negative
 set softtabstop=-1
 " make indenting commands snap to multiples of <shiftwidth> spaces
@@ -46,12 +43,100 @@ set shiftround
 set expandtab
 " make backspacing go back to a multiple of <shiftwidth> spaces instead of 1
 set smarttab
+" auto-indent new lines to same indentation as old lines
+set autoindent
+" copy indent structure of an old line when writing a new one
+set copyindent
+
+" By default, wrap lines at 80 characters; file types may override this
+set textwidth=80
+
+" Write the current file when jumping to another
+set autowrite
+" disable normal backups (created by writing to an existing file)
+set nobackup
+" enable swap file
+set swapfile
+" Wait 5 seconds before writing swap file
+set updatetime=5000
+" make backups before overwriting a file
+set writebackup
+" Save backups and swap files in the ~/.vimtmp directory
+set backupdir=~/.vimtmp
+set directory=~/.vimtmp,.
+
+" Search incrementally; ie find next match as the search input is changed
+set incsearch
+" Ignore case when searching
+set ignorecase
+" but override that when the search pattern contains uppercase chars
+set smartcase
+
+" Automatically reload files when they are changed by something besides Vim
+" (e.g. Git)
+set autoread
+
+" Enable wildmenu (vim command line completion for files and commands)
+set wildmenu
+" In wildmenu, ignore certain file types that never get edited
+set wildignore=*.o,*~,*.pyc,*.git/*
+
+" formatoptions help: ":help fo-table" or ":help fo"
+" Don't autowrap text
+set formatoptions-=t
+" Don't autowrap comments
+set formatoptions-=c
+" Do insert comment leader when hitting Enter in insert mode
+set formatoptions+=r
+" Do insert comment leader when hitting o or O on a comment line in normal mode
+set formatoptions+=o
+" Do allow formatoptionsrmatting comments with 'gq'
+set formatoptions+=q
+
+" Function for deleting trailing white space
+func! DeleteTrailingWS()
+  exe "normal mz"
+  %s/\s\+$//ge
+  exe "normal `z"
+endfunc
+" Delete trailing white space when saving a buffer
+autocmd BufWrite * :call DeleteTrailingWS()
+
+" Remember the 200 last commands
+set history=200
+
+" Remember 1000 undo stages of history
+set undolevels=1000
+
+" Folding settings - Experimental
+" Fold based on syntax
+set foldmethod=syntax
+" Limit the deepest possible fold to 3 levels
+set foldnestmax=3
+" Don't fold by default
+set nofoldenable
+" Close folds beyond level 1
+set foldlevel=1
+
+""" BINDINGS
+
+" bind F2 to toggle paste mode
+set pastetoggle=<F2>
+" most of the time paste mode is desired for inserting, so make it
+" automatically enter insert mode if pressed in normal mode
+nnoremap <F2> i<F2>
+
+" bind F3 to make install, then open the quickfix window to point at errors.
+" (at present, the most common use case includes 'make' as part of make
+" install)
+set makeprg=make
+nmap <F3> :wall<CR>:make! install<CR><CR>:cwindow<CR>
 
 " bind Ctrl-N to :nohlsearch (turn off search match highlight) command
-noremap <C-n> :nohlsearch<CR>
-vnoremap <C-n> :nohlsearch<CR>
+map <C-n> :nohlsearch<CR>
 
-" make multiple levels of indenting easier by keeping the same text selected after doing a < or >
+" make multiple levels of indenting easier by keeping the same text selected
+" after doing a < or >
 vnoremap > >gv
 vnoremap < <gv
 
@@ -61,7 +146,8 @@ vnoremap < <gv
 " prevent going into Ex mode by accident
 nnoremap Q <Nop>
 
-" bind Ctrl-H, Ctrl-J, Ctrl-K, Ctrl-L to move between windows rather than Ctrl-W + [hjkl]
+" bind Ctrl-H, Ctrl-J, Ctrl-K, Ctrl-L to move between windows rather than
+" Ctrl-W + [hjkl]
 map <C-h> <C-w>h
 map <C-j> <C-w>j
 map <C-k> <C-w>k
@@ -81,12 +167,23 @@ map <Leader>s <esc>:update<CR>
 " also bind Ctrl-s to save, for muscle memory
 map <C-s> <esc>:update<CR>
 
+" other muscle memory remappings
+" bind Ctrl-Z to undo
+nnoremap <C-z> u
+inoremap <C-z> <ESC>u
+vnoremap <C-z> u
+" could bind Ctrl-Y to redo here, but really what's the point, Ctrl-R already
+" does this and is close enough
+" bind Ctrl-A to select-all
+nnoremap <C-A> ggVG
+
 " bind :quit to ,q
 noremap <Leader>q :quit<CR>
 " and bind :quitall to ,Q
 noremap <Leader>Q :quitall<CR>
 
 " bind ,f and ,b to cnext and cprev for going through errors
+" another suggestion is to remap these to F4 and <Leader>F4
 nnoremap <Leader>f :cnext<CR>
 nnoremap <Leader>b :cprev<CR>
 
@@ -100,23 +197,45 @@ nnoremap <leader>W :let @w=expand("<cWORD>")<CR>
 " bind ,r to replace the current word with contents of the w register
 nnoremap <leader>r viw"wp
 
+" bind ,e to switch to the previous ("alternate") file, for toggling back and
+" forth between two files repeatedly
+nnoremap <leader>e <C-^>
+
+" bind ,x to switch between .h and .cpp files if they're in the same dir
+" (only relevant for heavy c/c++ use. should this go in ftplugin?)
+"nnoremap <leader>x  :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
+
+" bind ,p to reformat the current paragraph
+" Experimental. It may be preferable to put this on a key on the left side.
+nnoremap <leader>p gqip
+
+" Bind a rapid 'jk' to leave insert mode, without reaching up to hit ESC.
+" Disabled; the only reason this should be needed is if doing a lot of editing
+" on a device where capslock can't be remapped to ESC.
+"inoremap jk <ESC>
+"inoremap JK <ESC>
+"inoremap jj <Nop>
+
+" In normal and visual mode, when wrap is ON, the per-line (instead of
+" per-display) vertical movement is disorienting.
+" This is cured by remapping j and k to gj and gk:
+nnoremap j gj
+nnoremap k gk
+vnoremap j gj
+vnoremap k gk
+
+""" DISPLAY SETTINGS
+
 " highlight syntax
 syntax on
 
 " Assume we have 256 colors.
-" This'll only work right if the terminal supports 256 colors. But we're not
-" in the 80s.
+" This'll only work right if the terminal supports 256 colors. But that's
+" reasonable; this isn't the 80s.
 set t_Co=256
 
-" disable normal backups (created by writing to an existing file)
-set nobackup
-" disable swap file
-set noswapfile
-" don't make backups before overwriting a file
-set nowritebackup
-
-" auto-indent new lines to same indentation as old lines
-set autoindent
+" Always show statusline
+set laststatus=2
 
 " don't set in-editor newlines (lines can go off the right of the screen)
 set nowrap
@@ -128,23 +247,6 @@ set breakindent
 " Highlight search results
 set hlsearch
 
-" Search incrementally; ie find next match as the search input is changed
-set incsearch
-
-" Automatically read files when they are changed by something besides Vim
-" (i.e. Git)
-set autoread
-
-" Enable wildmenu (vim command line completion for files and commands)
-set wildmenu
-" In wildmenu, ignore certain file types that never get edited
-set wildignore=*.o,*~,*.pyc,*.git/*
-
-" Ignore case when searching
-set ignorecase
-" but override that when the search pattern contains uppercase chars
-set smartcase
-
 " don't redraw when executing a macro
 set lazyredraw
 
@@ -155,31 +257,32 @@ set nolist
 " anyway.
 set listchars=tab:>.,trail:.,extends:#,nbsp:.
 
-" formatoptions help: ":help fo-table" or ":help fo"
-" Don't autowrap text
-set fo-=t
-" Don't autowrap comments
-set fo-=c
-" Do insert comment leader when hitting Enter in insert mode
-set fo+=r
-" Do insert comment leader when hitting o or O on a comment line in normal mode
-set fo+=o
+" When entering a closing parenthesis or bracket, briefly hop to the opening
+" one
+set showmatch
 
-" Function for deleting trailing white space
-func! DeleteTrailingWS()
-  exe "normal mz"
-  %s/\s\+$//ge
-  exe "normal `z"
-endfunc
-" Delete trailing white space when saving a buffer
-autocmd BufWrite * :call DeleteTrailingWS()
+" Number lines in the margin
+set number
 
-" enable filetype detection
-filetype on
-" load plugins for file types
-filetype plugin on
-" indent based on file type
-filetype indent on
+" Show the file and path in the terminal title if possible (subject to change
+" if it gets too busy)
+set title
+
+" Never flash or ring bells
+set noerrorbells visualbell t_vb=
+
+" use custom color scheme for vimdiff
+if &diff
+  colorscheme vimdiff
+endif
+
+""" X WINDOWS SPECIFIC SETTINGS
+
+" Copy and paste into/out of the X clipboard
+set clipboard=unnamedplus
+
+" GVim - no blank white area at bottom
+set guiheadroom=0
 
 """ FILETYPE SPECIFIC SETTINGS
 " Handlebars HTML template files: Set .hbs files to html mode
@@ -212,10 +315,6 @@ autocmd FileType css set shiftwidth=4
 " set runtime path to include powerline
 "set rtp+=$HOME/.local/lib/python2.7/site-packages/powerline/bindings/vim/
 
-" Always show statusline
-"set laststatus=2
-
-
 """ VUNDLE
 " NOTE: If you just downloaded this vimrc, plugins will not be installed.
 " Run :PluginInstall or see documentation at github.com/VundleVim/Vundle.vim
@@ -224,7 +323,7 @@ autocmd FileType css set shiftwidth=4
 filetype off
 
 " set runtime path to include vundle
-set rtp+=$HOME/.vim/bundle/Vundle.vim
+set runtimepath+=$HOME/.vim/bundle/Vundle.vim
 
 " start vundle
 call vundle#begin()
@@ -240,23 +339,12 @@ vnoremap . :TComment<CR>
 
 """ MORE GENERAL SETTINGS THAT HAVE TO GO AFTER VUNDLE
 
-" set filetype again
+" enable filetype detection
 filetype on
-" use filetype plugins and filetype specific indentation
-filetype plugin indent on
-
-" use custom color scheme for vimdiff
-if &diff
-  colorscheme vimdiff
-endif
-
-""" X WINDOWS VIM ONLY
-
-" Copy and paste into/out of the X clipboard
-set clipboard=unnamedplus
-
-" GVim - no blank white area at bottom
-set guiheadroom=0
+" load plugins for file types
+filetype plugin on
+" indent based on file type
+filetype indent on
 
 " Helpful notes
 " Format XML and CSV: :%!xmllint --format -  :%!column -s, -t
