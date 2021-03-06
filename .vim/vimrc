@@ -65,6 +65,9 @@ set writebackup
 " Save backups and swap files in the ~/.vimtmp directory
 set backupdir=~/.vimtmp
 set directory=~/.vimtmp,.
+" Save undo history persistently in the same directory
+set undofile
+set undodir=~/.vimtmp/
 
 " Search incrementally; ie find next match as the search input is changed
 set incsearch
@@ -214,6 +217,10 @@ nnoremap <leader>e <C-^>
 " Experimental. It may be preferable to put this on a key on the left side.
 nnoremap <leader>p gqip
 
+" Bind ,u and ,U to make the current word lowercase or uppercase respectively
+nnoremap <leader>u viwue
+nnoremap <leader>U viwUe
+
 " Bind a rapid 'jk' to leave insert mode, without reaching up to hit ESC.
 " Disabled; the only reason this should be needed is if doing a lot of editing
 " on a device where capslock can't be remapped to ESC.
@@ -223,11 +230,17 @@ nnoremap <leader>p gqip
 
 " In normal and visual mode, when wrap is ON, the per-line (instead of
 " per-display) vertical movement is disorienting.
-" This is cured by remapping j and k to gj and gk:
+" Remapping j and k to gj and gk fixes this, while not affecting anything when
+" wrap is off
 nnoremap j gj
 nnoremap k gk
 vnoremap j gj
 vnoremap k gk
+
+" bind \ to search command history; it's important enough for a single key
+nmap \ q/
+" bind backspace to command history - slightly less important
+nmap <bs> q:
 
 """ DISPLAY SETTINGS
 
